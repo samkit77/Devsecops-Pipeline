@@ -41,7 +41,6 @@ function renderDocument() {
   els.input.disabled = !ready || busy;
   els.send.disabled = !ready || busy;
   els.input.placeholder = ready ? "Ask a question about your document…" : "Upload a document to start asking questions";
-  document.querySelectorAll(".starter").forEach((button) => { button.disabled = !ready || busy; });
 
   if (ready) {
     const extension = documentInfo.name.split(".").pop().toUpperCase();
@@ -182,7 +181,6 @@ els.input.addEventListener("input", autoResize);
 els.input.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); els.form.requestSubmit(); }
 });
-document.querySelectorAll(".starter").forEach((button) => button.addEventListener("click", () => ask(button.dataset.question)));
 els.deleteButton.addEventListener("click", () => { els.deleteModal.hidden = false; els.cancelDelete.focus(); });
 els.cancelDelete.addEventListener("click", () => { els.deleteModal.hidden = true; });
 els.confirmDelete.addEventListener("click", deleteDocument);
