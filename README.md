@@ -11,7 +11,7 @@ A focused, single-document Retrieval-Augmented Generation web application built 
 - Ask conversational questions grounded in the uploaded document
 - View or delete the active document and its index
 - Responsive, dependency-free browser interface
-- Docker baseline ready for later CI/CD and DevSecOps work
+- GitHub Actions tests the app and publishes verified Docker images to Amazon ECR
 
 Uploading a new document replaces the current document. This intentionally keeps the first version within the single-document scope.
 
@@ -39,10 +39,39 @@ Open http://127.0.0.1:8000. Interactive API documentation is available at http:/
 Create `.env` from `.env.example`, add the API key, then run:
 
 ```powershell
-docker compose up --build
+docker build -t lumen-rag:local .
+docker run -d --name lumen-rag -p 127.0.0.1:8000:8000 --env-file .env --mount type=volume,src=rag-data,dst=/app/data lumen-rag:local
 ```
 
-The FAISS index is persisted in the `rag-data` Docker volume.
+Open http://127.0.0.1:8000 and check readiness with `Invoke-RestMethod http://127.0.0.1:8000/api/health`. The FAISS index and chunk metadata persist in the `rag-data` Docker volume. Use `docker stop lumen-rag` and `docker start lumen-rag` for subsequent sessions.
+
+## Publish to Amazon ECR
+
+Pull requests targeting `main` run pytest, Gitleaks, OWASP Dependency-Check, build the Docker image, and scan it with Trivy. Pushes to `main` also publish the image to private ECR with the full commit SHA as its tag. A failed test, detected secret, or high or critical vulnerability stops publication.
+
+Configure once before the first push to `main`:
+
+1. In Amazon ECR, create a private repository in your chosen region (for example, `lumen-rag`).
+2. Create an AWS IAM access key with permission to push images to that ECR repository.
+3. In GitHub, open **Settings → Secrets and variables → Actions**.
+
+Add these repository secrets:
+
+| Secret | Value |
+| --- | --- |
+| `AWS_ACCESS_KEY_ID` | IAM access key ID |
+| `AWS_SECRET_ACCESS_KEY` | IAM secret access key |
+
+Add these repository variables:
+
+| Variable | Value |
+| --- | --- |
+| `AWS_REGION` | Region containing your ECR repository |
+| `ECR_REPOSITORY` | ECR repository name, including any path prefix |
+
+Gitleaks requires a `GITLEAKS_LICENSE` secret only when the repository belongs to a GitHub organization.
+
+After pushing to `main`, open the **Actions** run summary for the published image URI.
 
 ## Configuration
 
