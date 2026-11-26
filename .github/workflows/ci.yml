@@ -29,10 +29,10 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r requirements-dev.txt
+        run: python -m pip install -r requirements-dev.txt
 
       - name: Run tests
-        run: pytest -q
+        run: python -m pytest -q
 
       - name: Scan for secrets with Gitleaks
         uses: gitleaks/gitleaks-action@v3

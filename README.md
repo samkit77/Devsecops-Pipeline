@@ -91,7 +91,7 @@ Changing embedding models after indexing requires uploading the document again.
 
 ```powershell
 pip install -r requirements-dev.txt
-pytest
+python -m pytest
 ruff check app tests
 ```
 
